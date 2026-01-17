@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Age Calculator</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap');
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #333;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            padding: 2rem;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            margin: 20px 0; /* Margin for scrolling on small screens */
+        }
+
+        .highlight-title {
+            background: linear-gradient(to right, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-size: 2.2rem;
+            font-weight: 800;
+            margin-bottom: 1.5rem;
+            text-transform: none;
+        }
+
+        .input-group {
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        input[type="tel"] {
+            width: 100%;
+            padding: 15px;
+            font-size: 1.4rem;
+            font-weight: 600;
+            border: 2px solid #ddd;
+            border-radius: 12px;
+            outline: none;
+            text-align: center;
+            transition: all 0.3s ease;
+            box-sizing: border-box;
+            background: #f9f9f9;
+            color: #333;
+            letter-spacing: 2px;
+        }
+
+        input[type="tel"]:focus {
+            border-color: #764ba2;
+            background: #fff;
+            box-shadow: 0 0 10px rgba(118, 75, 162, 0.2);
+        }
+
+        .result-box {
+            display: none;
+            margin-top: 20px;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        .display-card {
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 15px;
+            text-align: left;
+        }
+
+        .display-card h3 {
+            margin: 0 0 5px;
+            font-size: 0.85rem;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .display-card p {
+            margin: 0;
+            font-size: 1.1rem;
+            font-weight: 700;
+        }
+
+        /* 1. Current Age Style */
+        .age-card {
+            background: #edf2f7;
+            border-left: 5px solid #667eea;
+        }
+        .age-card p { color: #2d3748; }
+
+        /* 2. 18+ Countdown Style */
+        .countdown-card {
+            background: #fff5f5;
+            border-left: 5px solid #fc8181;
+        }
+        .countdown-card p { color: #c53030; }
+        
+        .success-msg { 
+            background: #f0fff4; 
+            border-left: 5px solid #48bb78; 
+        }
+        .success-msg p { color: #2f855a; }
+
+        /* 3. Next Birthday Style (New) */
+        .next-bday-card {
+            background: #ebf8ff;
+            border-left: 5px solid #4299e1;
+        }
+        .next-bday-card p { color: #2b6cb0; }
+
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="highlight-title">Age calculator</div>
+        
+        <div class="input-group">
+            <input type="tel" id="dobInput" placeholder="DD/MM/YYYY" maxlength="10" inputmode="numeric">
+        </div>
+
+        <div id="resultArea" class="result-box">
+            
+            <div class="display-card age-card">
+                <h3>Your Current Age</h3>
+                <p id="currentAge">0 Years 0 Months 0 Days</p>
+            </div>
+
+            <div id="countdownBox" class="display-card countdown-card">
+                <h3>Time left to turn 18</h3>
+                <p id="timeLeft18">0 Years 0 Months 0 Days</p>
+            </div>
+
+            <div class="display-card next-bday-card">
+                <h3 id="nextBdayTitle">Time left for Next Birthday</h3>
+                <p id="timeLeftNext">0 Years 0 Months 0 Days</p>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        const dobInput = document.getElementById('dobInput');
+        const resultArea = document.getElementById('resultArea');
+        
+        const currentAgeText = document.getElementById('currentAge');
+        const countdownBox = document.getElementById('countdownBox');
+        const timeLeft18Text = document.getElementById('timeLeft18');
+        
+        const nextBdayTitle = document.getElementById('nextBdayTitle');
+        const timeLeftNextText = document.getElementById('timeLeftNext');
+
+        dobInput.addEventListener('input', function(e) {
+            if (e.inputType === "deleteContentBackward") return;
+
+            let raw = this.value.replace(/\D/g, ''); 
+            let day = "", month = "", year = "", formatted = "";
+
+            // DAY
+            if (raw.length > 0) {
+                day = raw.substring(0, 2);
+                formatted = day;
+            }
+
+            // MONTH (Smart Logic)
+            let monthStartIndex = 2;
+            if (raw.length > 2) {
+                formatted += '/';
+                let m1 = raw[2]; 
+                if (parseInt(m1) > 1) {
+                    month = m1;
+                    formatted += month;
+                    monthStartIndex = 3; 
+                } else {
+                    month = raw.substring(2, 4);
+                    formatted += month;
+                    monthStartIndex = 4; 
+                }
+            }
+
+            // YEAR (Strict 19xx - 20xx)
+            if (raw.length > monthStartIndex) {
+                formatted += '/';
+                let yearPart = raw.substring(monthStartIndex);
+                
+                if (yearPart.length >= 1) {
+                    if (yearPart[0] !== '1' && yearPart[0] !== '2') {
+                         yearPart = "";
+                         formatted = formatted.slice(0, -1);
+                    }
+                }
+                if (yearPart.length >= 2) {
+                    if (yearPart[0] === '1' && yearPart[1] !== '9') yearPart = yearPart[0];
+                    else if (yearPart[0] === '2' && yearPart[1] !== '0') yearPart = yearPart[0];
+                }
+                formatted += yearPart;
+            }
+
+            this.value = formatted;
+
+            // Check completion
+            const parts = this.value.split('/');
+            if (parts.length === 3 && parts[2].length === 4) {
+                this.blur();
+                calculateAge(this.value);
+            } else {
+                resultArea.style.display = 'none';
+            }
+        });
+
+        function calculateDiff(fromDate, toDate) {
+            let diffYears = toDate.getFullYear() - fromDate.getFullYear();
+            let diffMonths = toDate.getMonth() - fromDate.getMonth();
+            let diffDays = toDate.getDate() - fromDate.getDate();
+
+            if (diffDays < 0) {
+                diffMonths--;
+                const lastMonth = new Date(toDate.getFullYear(), toDate.getMonth(), 0);
+                diffDays += lastMonth.getDate();
+            }
+            if (diffMonths < 0) {
+                diffYears--;
+                diffMonths += 12;
+            }
+            return { y: diffYears, m: diffMonths, d: diffDays };
+        }
+
+        function calculateAge(dateString) {
+            const parts = dateString.split('/');
+            const day = parseInt(parts[0], 10);
+            const month = parseInt(parts[1], 10);
+            const year = parseInt(parts[2], 10);
+
+            if (isNaN(day) || isNaN(month) || isNaN(year)) return;
+            if (year < 1900 || year > 2100) return;
+
+            const dob = new Date(year, month - 1, day);
+            const today = new Date();
+
+            if (dob > today) return;
+
+            // 1. Current Age
+            let ageDiff = calculateDiff(dob, today);
+            currentAgeText.innerText = `${ageDiff.y} Years ${ageDiff.m} Months ${ageDiff.d} Days`;
+
+            // 2. Time to 18
+            if (ageDiff.y >= 18) {
+                countdownBox.className = "display-card success-msg";
+                countdownBox.querySelector('h3').innerText = "Legal Status";
+                timeLeft18Text.innerText = "You are already 18+! 🎉";
+            } else {
+                const target18 = new Date(year + 18, month - 1, day);
+                let diff18 = calculateDiff(today, target18);
+                
+                countdownBox.className = "display-card countdown-card";
+                countdownBox.querySelector('h3').innerText = "Time left to turn 18";
+                timeLeft18Text.innerText = `${diff18.y} Years ${diff18.m} Months ${diff18.d} Days`;
+            }
+
+            // 3. Time to Next Birthday (Next Year)
+            // Logic: Take DOB month/day, set year to Current Year. 
+            // If that date has passed, set to Next Year.
+            let nextBirthday = new Date(today.getFullYear(), month - 1, day);
+            
+            if (today > nextBirthday) {
+                nextBirthday.setFullYear(today.getFullYear() + 1);
+            }
+
+            let nextAge = ageDiff.y + 1; // You are currently X, next you will be X+1
+            let diffNext = calculateDiff(today, nextBirthday);
+
+            nextBdayTitle.innerText = `Time left to turn ${nextAge}`;
+            timeLeftNextText.innerText = `${diffNext.y} Years ${diffNext.m} Months ${diffNext.d} Days`;
+
+            resultArea.style.display = 'block';
+        }
+    </script>
+</body>
+</html>
