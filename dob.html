@@ -2,11 +2,11 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ultimate Age Calculator</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Age Calculator</title>
     <style>
         /* --- CSS: Beautiful Theme --- */
-        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap');
 
         body {
             margin: 0;
@@ -36,11 +36,11 @@
             background: linear-gradient(to right, #667eea, #764ba2);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            font-size: 2rem;
-            font-weight: 700;
+            /* Title Updates: Bold and specific casing */
+            font-size: 2.2rem;
+            font-weight: 800; /* Extra Bold */
             margin-bottom: 1.5rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
+            text-transform: none; /* Disables auto uppercase */
         }
 
         .input-group {
@@ -48,10 +48,12 @@
             margin-bottom: 20px;
         }
 
-        input[type="text"] {
+        /* Input field tailored for numbers */
+        input[type="tel"] {
             width: 100%;
             padding: 15px;
-            font-size: 1.2rem;
+            font-size: 1.4rem;
+            font-weight: 600;
             border: 2px solid #ddd;
             border-radius: 12px;
             outline: none;
@@ -63,20 +65,21 @@
             letter-spacing: 2px;
         }
 
-        input[type="text"]:focus {
+        input[type="tel"]:focus {
             border-color: #764ba2;
             background: #fff;
             box-shadow: 0 0 10px rgba(118, 75, 162, 0.2);
         }
 
-        input[type="text"]::placeholder {
+        input[type="tel"]::placeholder {
             color: #aaa;
             letter-spacing: 1px;
             font-size: 1rem;
+            font-weight: 400;
         }
 
         .result-box {
-            display: none; /* Hidden by default */
+            display: none;
             margin-top: 20px;
             animation: fadeIn 0.5s ease-in-out;
         }
@@ -135,20 +138,15 @@
             from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
         }
-
-        /* Responsive */
-        @media (max-width: 400px) {
-            .highlight-title { font-size: 1.5rem; }
-        }
     </style>
 </head>
 <body>
 
     <div class="container">
-        <div class="highlight-title">Age Calculator</div>
+        <div class="highlight-title">Age calculator</div>
         
         <div class="input-group">
-            <input type="text" id="dobInput" placeholder="DD/MM/YYYY" maxlength="10">
+            <input type="tel" id="dobInput" placeholder="DD/MM/YYYY" maxlength="10" inputmode="numeric" pattern="[0-9]*">
         </div>
 
         <div id="resultArea" class="result-box">
@@ -171,21 +169,93 @@
         const countdownBox = document.getElementById('countdownBox');
         const timeLeftText = document.getElementById('timeLeft');
 
-        // --- 1. Auto Slash Feature ---
+        // --- SMART INPUT FORMATTING LOGIC ---
         dobInput.addEventListener('input', function(e) {
-            let value = this.value.replace(/\D/g, ''); // Sirf numbers allow karega
-            
-            if (value.length > 2) {
-                value = value.substring(0, 2) + '/' + value.substring(2);
-            }
-            if (value.length > 5) {
-                value = value.substring(0, 5) + '/' + value.substring(5, 9);
-            }
-            
-            this.value = value;
+            // Remove any non-number characters first
+            let rawValue = this.value.replace(/\D/g, '');
+            let formattedValue = '';
 
-            // --- 2. Auto Calculate on Full Date ---
-            if (this.value.length === 10) {
+            // Handle deletion (backspace) naturally
+            if (e.inputType === "deleteContentBackward") {
+                return; 
+            }
+
+            // Logic Construction
+            if (rawValue.length > 0) {
+                // Day Logic (First 2 digits)
+                formattedValue += rawValue.substring(0, 2);
+
+                if (rawValue.length >= 2) {
+                    formattedValue += '/';
+                }
+
+                // Month Logic (Smart Jump)
+                if (rawValue.length > 2) {
+                    let monthPart = rawValue.substring(2);
+                    let firstDigitOfMonth = parseInt(monthPart[0]);
+
+                    // If user types digit > 1 (2-9) for first digit of month
+                    // Logic: There is no month starting with 2-9 (e.g. 20, 30), so it must be single digit.
+                    if (monthPart.length === 1 && firstDigitOfMonth > 1) {
+                         formattedValue += monthPart + '/';
+                    } 
+                    // Normal logic (Wait for 2 digits if starts with 0 or 1)
+                    else {
+                        formattedValue += monthPart.substring(0, 2);
+                        if (monthPart.length >= 2) {
+                            formattedValue += '/';
+                        }
+                    }
+                }
+
+                // Year Logic
+                if (rawValue.length > 4) { // Needs adjustment based on smart logic above
+                    // We need to fetch year part carefully depending on if month was 1 or 2 digits
+                    // Since the rawValue strips slashes, we have to rely on visual formatting logic visually.
+                    // But rawValue is purely numbers. e.g., 1822008 -> 18, 2, 2008
+                    
+                    // Re-evaluating smart string construction for Year:
+                    let day = rawValue.substring(0, 2);
+                    let monthRaw = rawValue.substring(2);
+                    let month = "";
+                    let year = "";
+
+                    if (monthRaw.length > 0) {
+                        let m1 = parseInt(monthRaw[0]);
+                        if (m1 > 1) {
+                            // Single digit month scenario (2-9)
+                            month = monthRaw[0];
+                            year = monthRaw.substring(1, 5);
+                        } else {
+                            // Potential double digit month scenario (0, 1)
+                            month = monthRaw.substring(0, 2);
+                            year = monthRaw.substring(2, 6);
+                        }
+                    }
+                    
+                    // Re-construct formatted string based on parsed parts
+                    formattedValue = day + '/';
+                    if (month) {
+                        formattedValue += month;
+                         // Add slash after month if:
+                         // 1. We have a single digit month > 1
+                         // 2. We have a double digit month
+                        if ((month.length === 1 && parseInt(month) > 1) || month.length === 2) {
+                            formattedValue += '/';
+                        }
+                    }
+                    if (year) formattedValue += year;
+                }
+            }
+
+            // Update the input field
+            this.value = formattedValue;
+
+            // Trigger Calculation
+            // We check if we have enough data (at least Day, Month, and 4-digit Year)
+            // A quick validation check
+            const parts = this.value.split('/');
+            if (parts.length === 3 && parts[2].length === 4) {
                 calculateAge(this.value);
             } else {
                 resultArea.style.display = 'none';
@@ -193,57 +263,46 @@
         });
 
         function calculateAge(dateString) {
-            // Date format parsing (DD/MM/YYYY)
             const parts = dateString.split('/');
             const day = parseInt(parts[0], 10);
             const month = parseInt(parts[1], 10);
             const year = parseInt(parts[2], 10);
 
-            // Basic Validation
+            if (isNaN(day) || isNaN(month) || isNaN(year)) return;
             if (month < 1 || month > 12 || day < 1 || day > 31) return;
 
             const dob = new Date(year, month - 1, day);
             const today = new Date();
 
             if (dob > today) {
-                alert("Date of birth future ki nahi ho sakti!");
+                // Future date handling - fail silently or reset
                 return;
             }
 
-            // --- 3. Calculate Exact Age ---
+            // Calc Exact Age
             let ageYears = today.getFullYear() - dob.getFullYear();
             let ageMonths = today.getMonth() - dob.getMonth();
             let ageDays = today.getDate() - dob.getDate();
 
             if (ageDays < 0) {
                 ageMonths--;
-                // Get days in previous month
                 const lastMonth = new Date(today.getFullYear(), today.getMonth(), 0);
                 ageDays += lastMonth.getDate();
             }
-
             if (ageMonths < 0) {
                 ageYears--;
                 ageMonths += 12;
             }
 
-            // Display Current Age
             currentAgeText.innerText = `${ageYears} Years ${ageMonths} Months ${ageDays} Days`;
 
-            // --- 4. Calculate Time Left for 18 ---
-            const ageInTotalDays = (today - dob) / (1000 * 60 * 60 * 24);
-            const eighteenYearsInDays = 18 * 365.25; // Approximate
-
+            // Calc Time Left for 18
             if (ageYears >= 18) {
-                // Already 18+
                 countdownBox.className = "countdown-display success-msg";
                 countdownBox.querySelector('h3').innerText = "Status";
                 timeLeftText.innerText = "You are already 18+! 🎉";
             } else {
-                // Calculate remaining time
-                // Target date is DOB year + 18
                 const targetDate = new Date(year + 18, month - 1, day);
-                
                 let diffYears = targetDate.getFullYear() - today.getFullYear();
                 let diffMonths = targetDate.getMonth() - today.getMonth();
                 let diffDays = targetDate.getDate() - today.getDate();
@@ -257,7 +316,7 @@
                     diffYears--;
                     diffMonths += 12;
                 }
-
+                
                 countdownBox.className = "countdown-display";
                 countdownBox.querySelector('h3').innerText = "Time left to turn 18";
                 timeLeftText.innerText = `${diffYears} Years ${diffMonths} Months ${diffDays} Days`;
