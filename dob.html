@@ -3,267 +3,493 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ultimate Age Calculator</title>
+    <title>Age Calculator</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* --- CSS: Beautiful Theme --- */
-        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
-
-        body {
+        * {
             margin: 0;
             padding: 0;
-            font-family: 'Poppins', sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            height: 100vh;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
-            color: #333;
+            padding: 20px;
         }
-
+        
         .container {
-            background: rgba(255, 255, 255, 0.9);
-            backdrop-filter: blur(10px);
-            padding: 2rem;
+            background-color: rgba(255, 255, 255, 0.95);
             border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-            width: 90%;
-            max-width: 400px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+            width: 100%;
+            max-width: 500px;
+            padding: 40px;
             text-align: center;
-            border: 1px solid rgba(255, 255, 255, 0.5);
         }
-
-        .highlight-title {
-            background: linear-gradient(to right, #667eea, #764ba2);
+        
+        .header {
+            margin-bottom: 30px;
+        }
+        
+        .header h1 {
+            color: #2c3e50;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            background: linear-gradient(to right, #6a11cb, #2575fc);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            font-size: 2rem;
-            font-weight: 700;
-            margin-bottom: 1.5rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
+            text-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
         }
-
-        .input-group {
-            position: relative;
-            margin-bottom: 20px;
+        
+        .header p {
+            color: #7f8c8d;
+            font-size: 1.1rem;
         }
-
-        input[type="text"] {
-            width: 100%;
-            padding: 15px;
-            font-size: 1.2rem;
+        
+        .input-container {
+            margin-bottom: 30px;
+        }
+        
+        .input-container label {
+            display: block;
+            text-align: left;
+            margin-bottom: 8px;
+            color: #2c3e50;
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+        
+        .dob-input {
+            display: flex;
+            justify-content: space-between;
             border: 2px solid #ddd;
             border-radius: 12px;
+            padding: 5px;
+            background-color: white;
+            transition: all 0.3s ease;
+        }
+        
+        .dob-input:focus-within {
+            border-color: #6a11cb;
+            box-shadow: 0 0 0 3px rgba(106, 17, 203, 0.2);
+        }
+        
+        .dob-input input {
+            border: none;
             outline: none;
             text-align: center;
-            transition: all 0.3s ease;
-            box-sizing: border-box;
-            background: #f9f9f9;
-            color: #333;
-            letter-spacing: 2px;
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #2c3e50;
+            width: 30%;
+            padding: 15px 0;
+            background-color: transparent;
         }
-
-        input[type="text"]:focus {
-            border-color: #764ba2;
-            background: #fff;
-            box-shadow: 0 0 10px rgba(118, 75, 162, 0.2);
+        
+        .separator {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #6a11cb;
+            font-size: 1.8rem;
+            font-weight: bold;
         }
-
-        input[type="text"]::placeholder {
-            color: #aaa;
-            letter-spacing: 1px;
-            font-size: 1rem;
+        
+        .results-container {
+            background: linear-gradient(to right, #f8f9fa, #e9ecef);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.05);
         }
-
-        .result-box {
-            display: none; /* Hidden by default */
-            margin-top: 20px;
-            animation: fadeIn 0.5s ease-in-out;
+        
+        .current-age {
+            margin-bottom: 25px;
         }
-
-        .age-display {
-            background: #edf2f7;
-            padding: 15px;
-            border-radius: 12px;
+        
+        .current-age h3 {
+            color: #2c3e50;
             margin-bottom: 15px;
-            border-left: 5px solid #667eea;
+            font-size: 1.4rem;
         }
-
-        .age-display h3 {
-            margin: 0 0 5px;
-            font-size: 0.9rem;
-            color: #666;
-            text-transform: uppercase;
+        
+        .age-display {
+            display: flex;
+            justify-content: space-between;
+            background-color: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
         }
-
-        .age-display p {
-            margin: 0;
-            font-size: 1.1rem;
-            font-weight: 600;
-            color: #2d3748;
+        
+        .age-unit {
+            text-align: center;
+            flex: 1;
         }
-
+        
+        .age-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #6a11cb;
+            line-height: 1;
+        }
+        
+        .age-label {
+            color: #7f8c8d;
+            font-size: 1rem;
+            margin-top: 5px;
+        }
+        
+        .countdown {
+            padding-top: 25px;
+            border-top: 2px dashed #ddd;
+        }
+        
+        .countdown h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 1.4rem;
+        }
+        
         .countdown-display {
-            background: #fff5f5;
-            padding: 15px;
-            border-radius: 12px;
-            border-left: 5px solid #fc8181;
+            background-color: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
         }
-
-        .countdown-display h3 {
-            margin: 0 0 5px;
-            font-size: 0.9rem;
-            color: #c53030;
-            text-transform: uppercase;
+        
+        .countdown-unit {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
         }
-
-        .countdown-display p {
-            margin: 0;
+        
+        .countdown-label {
+            color: #7f8c8d;
             font-size: 1.1rem;
+        }
+        
+        .countdown-value {
+            color: #e74c3c;
+            font-weight: 700;
+            font-size: 1.3rem;
+        }
+        
+        .highlight {
+            background-color: #ffeaa7;
+            padding: 3px 8px;
+            border-radius: 5px;
             font-weight: 600;
-            color: #c53030;
         }
-
-        .success-msg {
-            background: #f0fff4;
-            border-left: 5px solid #48bb78;
+        
+        .hint {
+            color: #7f8c8d;
+            font-size: 0.95rem;
+            margin-top: 20px;
+            font-style: italic;
         }
-        .success-msg h3 { color: #2f855a; }
-        .success-msg p { color: #2f855a; }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
+        
+        .footer {
+            margin-top: 20px;
+            color: #7f8c8d;
+            font-size: 0.9rem;
         }
-
-        /* Responsive */
-        @media (max-width: 400px) {
-            .highlight-title { font-size: 1.5rem; }
+        
+        @media (max-width: 480px) {
+            .container {
+                padding: 25px;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .dob-input input {
+                font-size: 1.3rem;
+                padding: 12px 0;
+            }
+            
+            .age-display {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .age-value {
+                font-size: 2rem;
+            }
         }
     </style>
 </head>
 <body>
-
     <div class="container">
-        <div class="highlight-title">Age Calculator</div>
-        
-        <div class="input-group">
-            <input type="text" id="dobInput" placeholder="DD/MM/YYYY" maxlength="10">
+        <div class="header">
+            <h1><span class="highlight">Age Calculator</span></h1>
+            <p>Enter your date of birth to calculate your exact age</p>
         </div>
-
-        <div id="resultArea" class="result-box">
-            <div class="age-display">
+        
+        <div class="input-container">
+            <label for="dob">Date of Birth (DD/MM/YYYY)</label>
+            <div class="dob-input">
+                <input type="text" id="day" placeholder="DD" maxlength="2" autocomplete="off">
+                <div class="separator">/</div>
+                <input type="text" id="month" placeholder="MM" maxlength="2" autocomplete="off">
+                <div class="separator">/</div>
+                <input type="text" id="year" placeholder="YYYY" maxlength="4" autocomplete="off">
+            </div>
+            <div class="hint">Enter your date of birth and slashes will be added automatically</div>
+        </div>
+        
+        <div class="results-container">
+            <div class="current-age">
                 <h3>Your Current Age</h3>
-                <p id="currentAge">0 Years 0 Months 0 Days</p>
+                <div class="age-display">
+                    <div class="age-unit">
+                        <div class="age-value" id="years">--</div>
+                        <div class="age-label">Years</div>
+                    </div>
+                    <div class="age-unit">
+                        <div class="age-value" id="months">--</div>
+                        <div class="age-label">Months</div>
+                    </div>
+                    <div class="age-unit">
+                        <div class="age-value" id="days">--</div>
+                        <div class="age-label">Days</div>
+                    </div>
+                </div>
             </div>
-
-            <div id="countdownBox" class="countdown-display">
-                <h3>Time left to turn 18</h3>
-                <p id="timeLeft">0 Years 0 Months 0 Days</p>
+            
+            <div class="countdown">
+                <h3>Time until 18 years</h3>
+                <div class="countdown-display">
+                    <div class="countdown-unit">
+                        <span class="countdown-label">Years</span>
+                        <span class="countdown-value" id="countdown-years">--</span>
+                    </div>
+                    <div class="countdown-unit">
+                        <span class="countdown-label">Months</span>
+                        <span class="countdown-value" id="countdown-months">--</span>
+                    </div>
+                    <div class="countdown-unit">
+                        <span class="countdown-label">Days</span>
+                        <span class="countdown-value" id="countdown-days">--</span>
+                    </div>
+                </div>
             </div>
+        </div>
+        
+        <div class="footer">
+            <p>Enter your complete date of birth to see detailed age calculation</p>
         </div>
     </div>
 
     <script>
-        const dobInput = document.getElementById('dobInput');
-        const resultArea = document.getElementById('resultArea');
-        const currentAgeText = document.getElementById('currentAge');
-        const countdownBox = document.getElementById('countdownBox');
-        const timeLeftText = document.getElementById('timeLeft');
-
-        // --- 1. Auto Slash Feature ---
-        dobInput.addEventListener('input', function(e) {
-            let value = this.value.replace(/\D/g, ''); // Sirf numbers allow karega
+        // DOM elements
+        const dayInput = document.getElementById('day');
+        const monthInput = document.getElementById('month');
+        const yearInput = document.getElementById('year');
+        
+        const yearsDisplay = document.getElementById('years');
+        const monthsDisplay = document.getElementById('months');
+        const daysDisplay = document.getElementById('days');
+        
+        const countdownYears = document.getElementById('countdown-years');
+        const countdownMonths = document.getElementById('countdown-months');
+        const countdownDays = document.getElementById('countdown-days');
+        
+        // Function to automatically move to next input
+        function moveToNext(current, nextId) {
+            if (current.value.length >= current.maxLength) {
+                document.getElementById(nextId).focus();
+            }
+        }
+        
+        // Function to validate date
+        function isValidDate(day, month, year) {
+            // Convert to numbers
+            const d = parseInt(day);
+            const m = parseInt(month);
+            const y = parseInt(year);
             
-            if (value.length > 2) {
-                value = value.substring(0, 2) + '/' + value.substring(2);
-            }
-            if (value.length > 5) {
-                value = value.substring(0, 5) + '/' + value.substring(5, 9);
+            // Check if all are numbers
+            if (isNaN(d) || isNaN(m) || isNaN(y)) {
+                return false;
             }
             
-            this.value = value;
-
-            // --- 2. Auto Calculate on Full Date ---
-            if (this.value.length === 10) {
-                calculateAge(this.value);
-            } else {
-                resultArea.style.display = 'none';
-            }
-        });
-
-        function calculateAge(dateString) {
-            // Date format parsing (DD/MM/YYYY)
-            const parts = dateString.split('/');
-            const day = parseInt(parts[0], 10);
-            const month = parseInt(parts[1], 10);
-            const year = parseInt(parts[2], 10);
-
-            // Basic Validation
-            if (month < 1 || month > 12 || day < 1 || day > 31) return;
-
-            const dob = new Date(year, month - 1, day);
+            // Basic validation
+            if (y < 1900 || y > new Date().getFullYear()) return false;
+            if (m < 1 || m > 12) return false;
+            
+            // Days in month validation
+            const daysInMonth = new Date(y, m, 0).getDate();
+            if (d < 1 || d > daysInMonth) return false;
+            
+            // Date should not be in the future
+            const inputDate = new Date(y, m - 1, d);
             const today = new Date();
-
-            if (dob > today) {
-                alert("Date of birth future ki nahi ho sakti!");
+            if (inputDate > today) return false;
+            
+            return true;
+        }
+        
+        // Function to calculate age
+        function calculateAge() {
+            const day = dayInput.value;
+            const month = monthInput.value;
+            const year = yearInput.value;
+            
+            // Check if we have a complete date
+            if (!day || !month || !year || day.length < 2 || month.length < 2 || year.length < 4) {
+                resetDisplay();
                 return;
             }
-
-            // --- 3. Calculate Exact Age ---
-            let ageYears = today.getFullYear() - dob.getFullYear();
-            let ageMonths = today.getMonth() - dob.getMonth();
-            let ageDays = today.getDate() - dob.getDate();
-
-            if (ageDays < 0) {
-                ageMonths--;
+            
+            // Validate date
+            if (!isValidDate(day, month, year)) {
+                resetDisplay();
+                alert("Please enter a valid date of birth (not in the future)");
+                return;
+            }
+            
+            // Calculate current age
+            const birthDate = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+            const today = new Date();
+            
+            let years = today.getFullYear() - birthDate.getFullYear();
+            let months = today.getMonth() - birthDate.getMonth();
+            let days = today.getDate() - birthDate.getDate();
+            
+            // Adjust for negative days
+            if (days < 0) {
+                months--;
                 // Get days in previous month
-                const lastMonth = new Date(today.getFullYear(), today.getMonth(), 0);
-                ageDays += lastMonth.getDate();
+                const prevMonthLastDay = new Date(today.getFullYear(), today.getMonth(), 0).getDate();
+                days += prevMonthLastDay;
             }
-
-            if (ageMonths < 0) {
-                ageYears--;
-                ageMonths += 12;
+            
+            // Adjust for negative months
+            if (months < 0) {
+                years--;
+                months += 12;
             }
-
-            // Display Current Age
-            currentAgeText.innerText = `${ageYears} Years ${ageMonths} Months ${ageDays} Days`;
-
-            // --- 4. Calculate Time Left for 18 ---
-            const ageInTotalDays = (today - dob) / (1000 * 60 * 60 * 24);
-            const eighteenYearsInDays = 18 * 365.25; // Approximate
-
-            if (ageYears >= 18) {
-                // Already 18+
-                countdownBox.className = "countdown-display success-msg";
-                countdownBox.querySelector('h3').innerText = "Status";
-                timeLeftText.innerText = "You are already 18+! 🎉";
-            } else {
-                // Calculate remaining time
-                // Target date is DOB year + 18
-                const targetDate = new Date(year + 18, month - 1, day);
-                
-                let diffYears = targetDate.getFullYear() - today.getFullYear();
-                let diffMonths = targetDate.getMonth() - today.getMonth();
-                let diffDays = targetDate.getDate() - today.getDate();
-
-                if (diffDays < 0) {
-                    diffMonths--;
-                    const lastMonth = new Date(targetDate.getFullYear(), targetDate.getMonth(), 0);
-                    diffDays += lastMonth.getDate();
-                }
-                if (diffMonths < 0) {
-                    diffYears--;
-                    diffMonths += 12;
-                }
-
-                countdownBox.className = "countdown-display";
-                countdownBox.querySelector('h3').innerText = "Time left to turn 18";
-                timeLeftText.innerText = `${diffYears} Years ${diffMonths} Months ${diffDays} Days`;
+            
+            // Display current age
+            yearsDisplay.textContent = years;
+            monthsDisplay.textContent = months;
+            daysDisplay.textContent = days;
+            
+            // Calculate countdown to 18 years
+            const eighteenthBirthday = new Date(birthDate);
+            eighteenthBirthday.setFullYear(birthDate.getFullYear() + 18);
+            
+            // Check if already 18+
+            if (today >= eighteenthBirthday) {
+                countdownYears.textContent = "0";
+                countdownMonths.textContent = "0";
+                countdownDays.textContent = "0";
+                return;
             }
-
-            resultArea.style.display = 'block';
+            
+            // Calculate time until 18th birthday
+            let yearsTo18 = eighteenthBirthday.getFullYear() - today.getFullYear();
+            let monthsTo18 = eighteenthBirthday.getMonth() - today.getMonth();
+            let daysTo18 = eighteenthBirthday.getDate() - today.getDate();
+            
+            // Adjust for negative days
+            if (daysTo18 < 0) {
+                monthsTo18--;
+                // Get days in previous month
+                const prevMonthLastDay = new Date(today.getFullYear(), today.getMonth(), 0).getDate();
+                daysTo18 += prevMonthLastDay;
+            }
+            
+            // Adjust for negative months
+            if (monthsTo18 < 0) {
+                yearsTo18--;
+                monthsTo18 += 12;
+            }
+            
+            // Display countdown
+            countdownYears.textContent = yearsTo18;
+            countdownMonths.textContent = monthsTo18;
+            countdownDays.textContent = daysTo18;
+        }
+        
+        // Reset display when inputs are incomplete
+        function resetDisplay() {
+            yearsDisplay.textContent = "--";
+            monthsDisplay.textContent = "--";
+            daysDisplay.textContent = "--";
+            
+            countdownYears.textContent = "--";
+            countdownMonths.textContent = "--";
+            countdownDays.textContent = "--";
+        }
+        
+        // Event listeners for inputs
+        dayInput.addEventListener('input', function() {
+            // Auto-add leading zero for single digit
+            if (this.value.length === 1 && parseInt(this.value) > 3) {
+                this.value = '0' + this.value;
+            }
+            
+            // Move to next input
+            moveToNext(this, 'month');
+            calculateAge();
+        });
+        
+        monthInput.addEventListener('input', function() {
+            // Auto-add leading zero for single digit
+            if (this.value.length === 1 && parseInt(this.value) > 1) {
+                this.value = '0' + this.value;
+            }
+            
+            // Move to next input
+            moveToNext(this, 'year');
+            calculateAge();
+        });
+        
+        yearInput.addEventListener('input', function() {
+            calculateAge();
+        });
+        
+        // Allow backspace to go to previous input
+        dayInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Backspace' && this.value.length === 0) {
+                e.preventDefault();
+                monthInput.focus();
+            }
+        });
+        
+        monthInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Backspace' && this.value.length === 0) {
+                e.preventDefault();
+                dayInput.focus();
+            }
+        });
+        
+        yearInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Backspace' && this.value.length === 0) {
+                e.preventDefault();
+                monthInput.focus();
+            }
+        });
+        
+        // Example: Pre-fill with the date you mentioned for demo
+        window.addEventListener('load', function() {
+            // Uncomment the next line to pre-fill with example date
+            // setExampleDate();
+        });
+        
+        function setExampleDate() {
+            dayInput.value = "18";
+            monthInput.value = "11";
+            yearInput.value = "2008";
+            calculateAge();
         }
     </script>
 </body>
