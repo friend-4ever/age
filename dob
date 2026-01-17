@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Age Calculator & 18+ Checker</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f2f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            text-align: center;
+            width: 350px;
+        }
+        h2 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        input[type="date"] {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 20px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            box-sizing: border-box; /* Ensures padding doesn't affect width */
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            width: 100%;
+            transition: background 0.3s;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .result {
+            margin-top: 20px;
+            text-align: left;
+            background: #f9f9f9;
+            padding: 15px;
+            border-radius: 8px;
+            display: none; /* Hidden by default */
+            border-left: 5px solid #007bff;
+        }
+        .result p {
+            margin: 8px 0;
+            color: #555;
+            font-size: 15px;
+        }
+        .highlight {
+            font-weight: bold;
+            color: #d9534f;
+        }
+        .green-text {
+            color: #28a745;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Age Calculator</h2>
+    <label for="dob" style="display:block; text-align:left; margin-bottom:5px; font-weight:bold;">Apna Date of Birth dalein:</label>
+    <input type="date" id="dob">
+    <button onclick="calculateAge()">Check Age</button>
+
+    <div class="result" id="resultBox">
+        <p id="exactAge"></p>
+        <hr>
+        <p id="status18"></p>
+    </div>
+</div>
+
+<script>
+    function calculateAge() {
+        // 1. Input Value Lena
+        var dobInput = document.getElementById("dob").value;
+        var resultBox = document.getElementById("resultBox");
+        
+        if (!dobInput) {
+            alert("Kripya pehle Date of Birth select karein!");
+            return;
+        }
+
+        // 2. Dates banana
+        var dob = new Date(dobInput);
+        var now = new Date();
+
+        // 3. Age Calculation (Years, Months, Days)
+        var years = now.getFullYear() - dob.getFullYear();
+        var months = now.getMonth() - dob.getMonth();
+        var days = now.getDate() - dob.getDate();
+
+        // Adjustments agar mahina/din negative ho
+        if (days < 0) {
+            months--;
+            // Pichle mahine ke din add karna
+            var prevMonth = new Date(now.getFullYear(), now.getMonth(), 0);
+            days += prevMonth.getDate();
+        }
+        if (months < 0) {
+            years--;
+            months += 12;
+        }
+
+        // 4. Output: Exact Age
+        document.getElementById("exactAge").innerHTML = 
+            `<strong>Aapki Exact Age hai:</strong><br>` +
+            `${years} Saal, ${months} Mahine, ${days} Din.`;
+
+        // 5. 18 Saal ka Calculation
+        var statusMsg = "";
+        
+        if (years >= 18) {
+            statusMsg = "<span class='green-text'>✅ Aap 18 saal se upar hain. (Eligible)</span>";
+        } else {
+            // Target date: 18th Birthday
+            var dobYear = dob.getFullYear();
+            var targetYear = dobYear + 18;
+            var targetDate = new Date(targetYear, dob.getMonth(), dob.getDate());
+            
+            // Difference in time
+            var diffTime = targetDate - now;
+            var diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
+
+            statusMsg = `<span class='highlight'>⚠️ Aap abhi 18 saal ke nahi hain.</span><br>` +
+                        `18 saal pura hone mein abhi <strong>${diffDays} din</strong> baki hain.`;
+        }
+
+        document.getElementById("status18").innerHTML = statusMsg;
+        resultBox.style.display = "block";
+    }
+</script>
+
+</body>
+</html>
