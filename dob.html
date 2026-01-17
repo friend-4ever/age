@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Age Calculator</title>
     <style>
-        /* --- CSS: Beautiful Theme --- */
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap');
 
         body {
@@ -75,55 +74,21 @@
             animation: fadeIn 0.5s ease-in-out;
         }
 
-        .age-display {
-            background: #edf2f7;
+        .age-display, .countdown-display {
             padding: 15px;
             border-radius: 12px;
             margin-bottom: 15px;
-            border-left: 5px solid #667eea;
         }
 
-        .age-display h3 {
-            margin: 0 0 5px;
-            font-size: 0.9rem;
-            color: #666;
-            text-transform: uppercase;
-        }
+        .age-display { background: #edf2f7; border-left: 5px solid #667eea; }
+        .countdown-display { background: #fff5f5; border-left: 5px solid #fc8181; }
 
-        .age-display p {
-            margin: 0;
-            font-size: 1.1rem;
-            font-weight: 600;
-            color: #2d3748;
-        }
+        h3 { margin: 0 0 5px; font-size: 0.9rem; color: #666; text-transform: uppercase; }
+        p { margin: 0; font-size: 1.1rem; font-weight: 600; color: #2d3748; }
 
-        .countdown-display {
-            background: #fff5f5;
-            padding: 15px;
-            border-radius: 12px;
-            border-left: 5px solid #fc8181;
-        }
-
-        .countdown-display h3 {
-            margin: 0 0 5px;
-            font-size: 0.9rem;
-            color: #c53030;
-            text-transform: uppercase;
-        }
-
-        .countdown-display p {
-            margin: 0;
-            font-size: 1.1rem;
-            font-weight: 600;
-            color: #c53030;
-        }
-
-        .success-msg {
-            background: #f0fff4;
-            border-left: 5px solid #48bb78;
-        }
-        .success-msg h3 { color: #2f855a; }
-        .success-msg p { color: #2f855a; }
+        .countdown-display p { color: #c53030; }
+        .success-msg { background: #f0fff4; border-left: 5px solid #48bb78; }
+        .success-msg h3, .success-msg p { color: #2f855a; }
 
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(10px); }
@@ -145,7 +110,6 @@
                 <h3>Your Current Age</h3>
                 <p id="currentAge">0 Years 0 Months 0 Days</p>
             </div>
-
             <div id="countdownBox" class="countdown-display">
                 <h3>Time left to turn 18</h3>
                 <p id="timeLeft">0 Years 0 Months 0 Days</p>
@@ -161,75 +125,82 @@
         const timeLeftText = document.getElementById('timeLeft');
 
         dobInput.addEventListener('input', function(e) {
-            // Handle backspace normally
+            // Backspace handling
             if (e.inputType === "deleteContentBackward") return;
 
-            // 1. Get only numbers
-            let val = this.value.replace(/\D/g, '');
-            let formatted = '';
+            // 1. RAW NUMBERS ONLY
+            let raw = this.value.replace(/\D/g, ''); 
+            
+            // --- LOGIC TO CONSTRUCT DATE ---
+            let day = "";
+            let month = "";
+            let year = "";
+            let formatted = "";
 
-            // 2. Build Day (DD)
-            if (val.length > 0) {
-                formatted = val.substring(0, 2);
-                if (val.length >= 2) formatted += '/';
+            // DAY (First 2 chars)
+            if (raw.length > 0) {
+                day = raw.substring(0, 2);
+                formatted = day;
             }
 
-            // 3. Build Month (MM) - Smart Logic
-            if (val.length > 2) {
-                let monthPart = val.substring(2);
-                let firstDigit = parseInt(monthPart[0]);
+            // MONTH (Smart Logic)
+            let monthStartIndex = 2;
+            if (raw.length > 2) {
+                formatted += '/';
+                let m1 = raw[2]; // 3rd digit
 
-                // If first digit is 2-9, it's a single digit month (e.g. Feb-Sept)
-                if (monthPart.length >= 1 && firstDigit > 1) {
-                    formatted += monthPart[0] + '/';
-                    // Re-adjust 'val' logic for year parsing below if needed, 
-                    // but simplest is to take remainder as year
+                if (parseInt(m1) > 1) {
+                    // If month starts with 2-9, it's a single digit month
+                    month = m1;
+                    formatted += month;
+                    monthStartIndex = 3; // Year starts after 3 digits (2 for day + 1 for month)
                 } else {
-                    // Standard 01-12 logic
-                    formatted += monthPart.substring(0, 2);
-                    if (monthPart.length >= 2) formatted += '/';
+                    // If starts with 0 or 1, take 2 digits if available
+                    month = raw.substring(2, 4);
+                    formatted += month;
+                    monthStartIndex = 4; // Year starts after 4 digits (2 for day + 2 for month)
                 }
             }
 
-            // 4. Build Year (YYYY) - Strict 19xx / 20xx Logic
-            let partsSoFar = formatted.split('/');
-            
-            // We only process year if we have passed the second slash
-            if (partsSoFar.length === 3) {
-                let yearPartRaw = partsSoFar[2]; // Whatever is currently in the year slot
+            // YEAR (The tricky part)
+            if (raw.length > monthStartIndex) {
+                formatted += '/';
+                let yearPart = raw.substring(monthStartIndex);
                 
-                // Logic to extract year part from original 'val' is tricky because of the smart slash.
-                // Instead, let's rely on what the user JUST typed.
-                
-                // Let's filter the Year Part strictly:
-                if (yearPartRaw.length > 0) {
-                    let y1 = yearPartRaw[0];
-                    
-                    // Rule 1: First digit MUST be 1 or 2
-                    if (y1 !== '1' && y1 !== '2') {
-                        // If invalid, remove it from formatted
-                        formatted = formatted.slice(0, -1);
-                    } else {
-                        // First digit is valid. Check second digit if it exists.
-                        if (yearPartRaw.length > 1) {
-                            let y2 = yearPartRaw[1];
-                            // Rule 2: If starts with 1, next must be 9. If starts with 2, next must be 0.
-                            if (y1 === '1' && y2 !== '9') {
-                                formatted = formatted.slice(0, -1);
-                            } else if (y1 === '2' && y2 !== '0') {
-                                formatted = formatted.slice(0, -1);
-                            }
-                        }
+                // --- STRICT YEAR GUARD ---
+                // Check 1st Digit
+                if (yearPart.length >= 1) {
+                    if (yearPart[0] !== '1' && yearPart[0] !== '2') {
+                        // Invalid start, remove it (block typing)
+                         yearPart = "";
+                         // We also need to remove it from 'raw' theoretically to stop loop, 
+                         // but cutting 'formatted' is enough for display.
+                         formatted = formatted.slice(0, -1); // Remove the slash we just added or partial year
+                         // Actually, just returning the formatted string without the bad digit works
                     }
                 }
+                
+                // Check 2nd Digit
+                if (yearPart.length >= 2) {
+                    if (yearPart[0] === '1' && yearPart[1] !== '9') {
+                         yearPart = yearPart[0]; // Keep only first digit
+                    } else if (yearPart[0] === '2' && yearPart[1] !== '0') {
+                         yearPart = yearPart[0]; // Keep only first digit
+                    }
+                }
+
+                formatted += yearPart;
             }
 
-            // Update Input
+            // Update Input Value
             this.value = formatted;
 
-            // 5. Final Check & Auto Hide
-            if (this.value.length === 10) {
-                this.blur(); // Hides keyboard
+            // --- AUTO HIDE & CALCULATE ---
+            // Check if we have a full date (approx length 8 to 10 depending on single digit months)
+            // Robust check: 3 parts and year is 4 digits
+            const parts = this.value.split('/');
+            if (parts.length === 3 && parts[2].length === 4) {
+                this.blur(); // Hide Keyboard
                 calculateAge(this.value);
             } else {
                 resultArea.style.display = 'none';
@@ -242,16 +213,15 @@
             const month = parseInt(parts[1], 10);
             const year = parseInt(parts[2], 10);
 
-            // Validation
             if (isNaN(day) || isNaN(month) || isNaN(year)) return;
-            if (year < 1901 || year > 2099) return; // Strict range check for calculation
+            // Additional safety range
+            if (year < 1900 || year > 2100) return;
 
             const dob = new Date(year, month - 1, day);
             const today = new Date();
 
             if (dob > today) return;
 
-            // Age Calc
             let ageYears = today.getFullYear() - dob.getFullYear();
             let ageMonths = today.getMonth() - dob.getMonth();
             let ageDays = today.getDate() - dob.getDate();
@@ -268,7 +238,6 @@
 
             currentAgeText.innerText = `${ageYears} Years ${ageMonths} Months ${ageDays} Days`;
 
-            // Countdown Calc
             if (ageYears >= 18) {
                 countdownBox.className = "countdown-display success-msg";
                 countdownBox.querySelector('h3').innerText = "Status";
@@ -293,7 +262,6 @@
                 countdownBox.querySelector('h3').innerText = "Time left to turn 18";
                 timeLeftText.innerText = `${diffYears} Years ${diffMonths} Months ${diffDays} Days`;
             }
-
             resultArea.style.display = 'block';
         }
     </script>
