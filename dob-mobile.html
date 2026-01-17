@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Age Calculator</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap');
 
         body {
             margin: 0;
@@ -20,7 +20,7 @@
         }
 
         .container {
-            background: rgba(255, 255, 255, 0.9);
+            background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(10px);
             padding: 2rem;
             border-radius: 20px;
@@ -29,7 +29,7 @@
             max-width: 400px;
             text-align: center;
             border: 1px solid rgba(255, 255, 255, 0.5);
-            margin: 20px 0; /* Margin for scrolling on small screens */
+            margin: 20px 0;
         }
 
         .highlight-title {
@@ -88,41 +88,66 @@
             color: #666;
             text-transform: uppercase;
             letter-spacing: 0.5px;
+            font-weight: 600;
         }
 
-        .display-card p {
+        .display-card p.main-stat {
             margin: 0;
             font-size: 1.1rem;
-            font-weight: 700;
+            font-weight: 800;
         }
 
-        /* 1. Current Age Style */
-        .age-card {
-            background: #edf2f7;
-            border-left: 5px solid #667eea;
-        }
-        .age-card p { color: #2d3748; }
+        /* 1. Current Age */
+        .age-card { background: #edf2f7; border-left: 5px solid #667eea; }
+        .age-card .main-stat { color: #2d3748; }
 
-        /* 2. 18+ Countdown Style */
-        .countdown-card {
-            background: #fff5f5;
-            border-left: 5px solid #fc8181;
-        }
-        .countdown-card p { color: #c53030; }
+        /* 2. 18+ Countdown */
+        .countdown-card { background: #fff5f5; border-left: 5px solid #fc8181; }
+        .countdown-card .main-stat { color: #c53030; }
         
-        .success-msg { 
-            background: #f0fff4; 
-            border-left: 5px solid #48bb78; 
-        }
-        .success-msg p { color: #2f855a; }
+        .success-msg { background: #f0fff4; border-left: 5px solid #48bb78; }
+        .success-msg .main-stat { color: #2f855a; }
 
-        /* 3. Next Birthday Style (New) */
+        /* 3. Next Birthday (Blue Theme) */
         .next-bday-card {
             background: #ebf8ff;
             border-left: 5px solid #4299e1;
+            position: relative;
+            overflow: hidden;
         }
-        .next-bday-card p { color: #2b6cb0; }
+        .next-bday-card .main-stat { color: #2b6cb0; margin-bottom: 10px; }
 
+        /* Live Timer Grid */
+        .timer-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 5px;
+            text-align: center;
+            margin-top: 10px;
+            border-top: 1px solid rgba(66, 153, 225, 0.3);
+            padding-top: 10px;
+        }
+
+        .timer-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .timer-val {
+            font-size: 1.1rem;
+            font-weight: 800;
+            color: #2b6cb0;
+            line-height: 1;
+        }
+
+        .timer-label {
+            font-size: 0.6rem;
+            text-transform: uppercase;
+            color: #63b3ed;
+            margin-top: 3px;
+            font-weight: 600;
+        }
 
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(10px); }
@@ -143,17 +168,39 @@
             
             <div class="display-card age-card">
                 <h3>Your Current Age</h3>
-                <p id="currentAge">0 Years 0 Months 0 Days</p>
+                <p class="main-stat" id="currentAge">0 Years 0 Months 0 Days</p>
             </div>
 
             <div id="countdownBox" class="display-card countdown-card">
                 <h3>Time left to turn 18</h3>
-                <p id="timeLeft18">0 Years 0 Months 0 Days</p>
+                <p class="main-stat" id="timeLeft18">0 Years 0 Months 0 Days</p>
             </div>
 
             <div class="display-card next-bday-card">
-                <h3 id="nextBdayTitle">Time left for Next Birthday</h3>
-                <p id="timeLeftNext">0 Years 0 Months 0 Days</p>
+                <h3 id="nextBdayTitle">Time left to turn Next Year</h3>
+                
+                <div class="timer-grid">
+                    <div class="timer-item">
+                        <span class="timer-val" id="valWeeks">0</span>
+                        <span class="timer-label">Weeks</span>
+                    </div>
+                    <div class="timer-item">
+                        <span class="timer-val" id="valDays">0</span>
+                        <span class="timer-label">Days</span>
+                    </div>
+                    <div class="timer-item">
+                        <span class="timer-val" id="valHours">0</span>
+                        <span class="timer-label">Hrs</span>
+                    </div>
+                    <div class="timer-item">
+                        <span class="timer-val" id="valMins">0</span>
+                        <span class="timer-label">Mins</span>
+                    </div>
+                    <div class="timer-item">
+                        <span class="timer-val" id="valSecs">0</span>
+                        <span class="timer-label">Secs</span>
+                    </div>
+                </div>
             </div>
 
         </div>
@@ -162,69 +209,57 @@
     <script>
         const dobInput = document.getElementById('dobInput');
         const resultArea = document.getElementById('resultArea');
-        
         const currentAgeText = document.getElementById('currentAge');
         const countdownBox = document.getElementById('countdownBox');
         const timeLeft18Text = document.getElementById('timeLeft18');
-        
         const nextBdayTitle = document.getElementById('nextBdayTitle');
-        const timeLeftNextText = document.getElementById('timeLeftNext');
+        
+        // Timer Elements
+        const valWeeks = document.getElementById('valWeeks');
+        const valDays = document.getElementById('valDays');
+        const valHours = document.getElementById('valHours');
+        const valMins = document.getElementById('valMins');
+        const valSecs = document.getElementById('valSecs');
+
+        let timerInterval = null;
 
         dobInput.addEventListener('input', function(e) {
             if (e.inputType === "deleteContentBackward") return;
-
             let raw = this.value.replace(/\D/g, ''); 
-            let day = "", month = "", year = "", formatted = "";
-
-            // DAY
-            if (raw.length > 0) {
-                day = raw.substring(0, 2);
-                formatted = day;
-            }
-
-            // MONTH (Smart Logic)
+            let formatted = "";
             let monthStartIndex = 2;
+
+            if (raw.length > 0) formatted = raw.substring(0, 2);
             if (raw.length > 2) {
                 formatted += '/';
-                let m1 = raw[2]; 
+                let m1 = raw[2];
                 if (parseInt(m1) > 1) {
-                    month = m1;
-                    formatted += month;
+                    formatted += m1;
                     monthStartIndex = 3; 
                 } else {
-                    month = raw.substring(2, 4);
-                    formatted += month;
+                    formatted += raw.substring(2, 4);
                     monthStartIndex = 4; 
                 }
             }
-
-            // YEAR (Strict 19xx - 20xx)
             if (raw.length > monthStartIndex) {
                 formatted += '/';
                 let yearPart = raw.substring(monthStartIndex);
-                
-                if (yearPart.length >= 1) {
-                    if (yearPart[0] !== '1' && yearPart[0] !== '2') {
-                         yearPart = "";
-                         formatted = formatted.slice(0, -1);
-                    }
-                }
-                if (yearPart.length >= 2) {
+                if (yearPart.length >= 1 && yearPart[0] !== '1' && yearPart[0] !== '2') yearPart = "";
+                else if (yearPart.length >= 2) {
                     if (yearPart[0] === '1' && yearPart[1] !== '9') yearPart = yearPart[0];
                     else if (yearPart[0] === '2' && yearPart[1] !== '0') yearPart = yearPart[0];
                 }
                 formatted += yearPart;
             }
-
             this.value = formatted;
 
-            // Check completion
             const parts = this.value.split('/');
             if (parts.length === 3 && parts[2].length === 4) {
                 this.blur();
                 calculateAge(this.value);
             } else {
                 resultArea.style.display = 'none';
+                if (timerInterval) clearInterval(timerInterval);
             }
         });
 
@@ -232,7 +267,6 @@
             let diffYears = toDate.getFullYear() - fromDate.getFullYear();
             let diffMonths = toDate.getMonth() - fromDate.getMonth();
             let diffDays = toDate.getDate() - fromDate.getDate();
-
             if (diffDays < 0) {
                 diffMonths--;
                 const lastMonth = new Date(toDate.getFullYear(), toDate.getMonth(), 0);
@@ -255,15 +289,27 @@
             if (year < 1900 || year > 2100) return;
 
             const dob = new Date(year, month - 1, day);
-            const today = new Date();
+            
+            // Initial Calc
+            updateStats(dob, day, month, year);
 
-            if (dob > today) return;
+            // Start Live Timer for Next Birthday
+            if (timerInterval) clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                updateStats(dob, day, month, year);
+            }, 1000);
+
+            resultArea.style.display = 'block';
+        }
+
+        function updateStats(dob, day, month, year) {
+            const today = new Date();
 
             // 1. Current Age
             let ageDiff = calculateDiff(dob, today);
             currentAgeText.innerText = `${ageDiff.y} Years ${ageDiff.m} Months ${ageDiff.d} Days`;
 
-            // 2. Time to 18
+            // 2. 18+ Status
             if (ageDiff.y >= 18) {
                 countdownBox.className = "display-card success-msg";
                 countdownBox.querySelector('h3').innerText = "Legal Status";
@@ -271,28 +317,39 @@
             } else {
                 const target18 = new Date(year + 18, month - 1, day);
                 let diff18 = calculateDiff(today, target18);
-                
                 countdownBox.className = "display-card countdown-card";
                 countdownBox.querySelector('h3').innerText = "Time left to turn 18";
                 timeLeft18Text.innerText = `${diff18.y} Years ${diff18.m} Months ${diff18.d} Days`;
             }
 
-            // 3. Time to Next Birthday (Next Year)
-            // Logic: Take DOB month/day, set year to Current Year. 
-            // If that date has passed, set to Next Year.
+            // 3. Next Birthday Live Counter
             let nextBirthday = new Date(today.getFullYear(), month - 1, day);
-            
             if (today > nextBirthday) {
                 nextBirthday.setFullYear(today.getFullYear() + 1);
             }
 
-            let nextAge = ageDiff.y + 1; // You are currently X, next you will be X+1
-            let diffNext = calculateDiff(today, nextBirthday);
+            // Title Update (e.g., Time left to turn 22 Years)
+            let nextAge = ageDiff.y + 1;
+            nextBdayTitle.innerText = `Time left to turn ${nextAge} Years`;
 
-            nextBdayTitle.innerText = `Time left to turn ${nextAge}`;
-            timeLeftNextText.innerText = `${diffNext.y} Years ${diffNext.m} Months ${diffNext.d} Days`;
+            // Calculate exact milliseconds difference
+            const diffMs = nextBirthday - today;
 
-            resultArea.style.display = 'block';
+            const seconds = Math.floor((diffMs / 1000) % 60);
+            const minutes = Math.floor((diffMs / 1000 / 60) % 60);
+            const hours = Math.floor((diffMs / (1000 * 60 * 60)) % 24);
+            const daysTotal = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+            
+            // Calculate Weeks and remaining Days
+            const weeks = Math.floor(daysTotal / 7);
+            const days = daysTotal % 7;
+
+            // Update DOM
+            valWeeks.innerText = weeks;
+            valDays.innerText = days;
+            valHours.innerText = hours;
+            valMins.innerText = minutes;
+            valSecs.innerText = seconds;
         }
     </script>
 </body>
