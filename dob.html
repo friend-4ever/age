@@ -1,54 +1,103 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Countdown</title>
-    <style>
-        body{
-            font-family: Arial, sans-serif;
-            text-align: center;
-            margin-top: 50px;
-        }
-        .countdown{
-            font-size: 28px;
-            font-weight: bold;
-        }
-    </style>
+<title>Age Calculator</title>
+<style>
+body{
+    font-family: Arial, sans-serif;
+    margin-top: 40px;
+    text-align: center;
+}
+.title{
+    font-size: 32px;
+    font-weight: bold;
+    color: #0d6efd;
+    margin-bottom: 20px;
+}
+input{
+    font-size: 18px;
+    padding: 8px;
+    width: 180px;
+    text-align: center;
+}
+button{
+    margin-top: 20px;
+    padding: 10px 30px;
+    font-size: 18px;
+    cursor: pointer;
+}
+.result{
+    font-size: 22px;
+    margin-top: 25px;
+    font-weight: bold;
+}
+</style>
 </head>
 <body>
 
-<h2>Remaining Time</h2>
-<div id="count" class="countdown">Calculating...</div>
+<div class="title">AGE CALCULATOR</div>
+
+<label>Enter Date of Birth (DD/MM/YYYY)</label><br><br>
+<input type="text" id="dob" placeholder="DD/MM/YYYY"><br>
+
+<button onclick="calculate()">Calculate</button>
+
+<div id="age" class="result"></div>
+<div id="remaining" class="result"></div>
 
 <script>
-    function calculateTimeLeft(targetDate) {
-        const now = new Date();
-        let years = targetDate.getFullYear() - now.getFullYear();
-        let months = targetDate.getMonth() - now.getMonth();
-        let days = targetDate.getDate() - now.getDate();
+function calculate() {
+    let dob = document.getElementById("dob").value;
+    let parts = dob.split("/");
+    let birthDate = new Date(parts[2], parts[1] - 1, parts[0]);
+    let today = new Date();
 
-        if (days < 0) {
-            months--;
-            let prevMonth = new Date(targetDate.getFullYear(), targetDate.getMonth(), 0);
-            days += prevMonth.getDate();
-        }
+    // Age Calculation
+    let y = today.getFullYear() - birthDate.getFullYear();
+    let m = today.getMonth() - birthDate.getMonth();
+    let d = today.getDate() - birthDate.getDate();
 
-        if (months < 0) {
-            years--;
-            months += 12;
-        }
-
-        return { years, months, days };
+    if (d < 0) {
+        m--;
+        let prev = new Date(today.getFullYear(), today.getMonth(), 0);
+        d += prev.getDate();
     }
 
-    function updateCountdown() {
-        const targetDate = new Date("2027-05-10"); // <-- yaha apni date set karo
-        const timeLeft = calculateTimeLeft(targetDate);
-        document.getElementById("count").innerHTML =
-            timeLeft.years + " Years " + timeLeft.months + " Months " + timeLeft.days + " Days left";
+    if (m < 0) {
+        y--;
+        m += 12;
     }
 
-    updateCountdown();
-    setInterval(updateCountdown, 86400000); // har 24 ghante update
+    document.getElementById("age").innerHTML =
+        "Current Age: " + y + " Years " + m + " Months " + d + " Days";
+
+    // 18 Year Target
+    let target18 = new Date(birthDate);
+    target18.setFullYear(target18.getFullYear() + 18);
+
+    let Y = target18.getFullYear() - today.getFullYear();
+    let M = target18.getMonth() - today.getMonth();
+    let D = target18.getDate() - today.getDate();
+
+    if (D < 0) {
+        M--;
+        let prev2 = new Date(target18.getFullYear(), target18.getMonth(), 0);
+        D += prev2.getDate();
+    }
+
+    if (M < 0) {
+        Y--;
+        M += 12;
+    }
+
+    if (Y < 0) {
+        document.getElementById("remaining").innerHTML =
+            "18 Years Completed";
+    } else {
+        document.getElementById("remaining").innerHTML =
+            "Time Left for 18 Years: " + Y + " Years " + M + " Months " + D + " Days";
+    }
+}
 </script>
 
 </body>
