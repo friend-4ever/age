@@ -126,6 +126,7 @@
             margin-top: 10px;
             border-top: 1px solid rgba(66, 153, 225, 0.3);
             padding-top: 10px;
+            margin-bottom: 10px; /* Space for the text below */
         }
 
         .timer-item {
@@ -147,6 +148,18 @@
             color: #63b3ed;
             margin-top: 3px;
             font-weight: 600;
+        }
+        
+        /* New Text Below Timer */
+        .next-bday-text {
+            text-align: center;
+            font-size: 1rem;
+            font-weight: 700;
+            color: #2c5282;
+            background: rgba(255,255,255,0.5);
+            padding: 5px;
+            border-radius: 8px;
+            margin-top: 5px;
         }
 
         @keyframes fadeIn {
@@ -201,6 +214,11 @@
                         <span class="timer-label">Secs</span>
                     </div>
                 </div>
+
+                <div id="nextBdayText" class="next-bday-text">
+                    0 Years 0 Months 0 Days
+                </div>
+
             </div>
 
         </div>
@@ -213,6 +231,7 @@
         const countdownBox = document.getElementById('countdownBox');
         const timeLeft18Text = document.getElementById('timeLeft18');
         const nextBdayTitle = document.getElementById('nextBdayTitle');
+        const nextBdayText = document.getElementById('nextBdayText'); // New Element
         
         // Timer Elements
         const valWeeks = document.getElementById('valWeeks');
@@ -290,10 +309,8 @@
 
             const dob = new Date(year, month - 1, day);
             
-            // Initial Calc
             updateStats(dob, day, month, year);
 
-            // Start Live Timer for Next Birthday
             if (timerInterval) clearInterval(timerInterval);
             timerInterval = setInterval(() => {
                 updateStats(dob, day, month, year);
@@ -322,34 +339,34 @@
                 timeLeft18Text.innerText = `${diff18.y} Years ${diff18.m} Months ${diff18.d} Days`;
             }
 
-            // 3. Next Birthday Live Counter
+            // 3. Next Birthday Logic
             let nextBirthday = new Date(today.getFullYear(), month - 1, day);
             if (today > nextBirthday) {
                 nextBirthday.setFullYear(today.getFullYear() + 1);
             }
 
-            // Title Update (e.g., Time left to turn 22 Years)
+            // A. Title
             let nextAge = ageDiff.y + 1;
             nextBdayTitle.innerText = `Time left to turn ${nextAge} Years`;
 
-            // Calculate exact milliseconds difference
+            // B. Ticker (Weeks, Hours, Secs)
             const diffMs = nextBirthday - today;
-
             const seconds = Math.floor((diffMs / 1000) % 60);
             const minutes = Math.floor((diffMs / 1000 / 60) % 60);
             const hours = Math.floor((diffMs / (1000 * 60 * 60)) % 24);
             const daysTotal = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-            
-            // Calculate Weeks and remaining Days
             const weeks = Math.floor(daysTotal / 7);
-            const days = daysTotal % 7;
+            const daysLeftForTicker = daysTotal % 7;
 
-            // Update DOM
             valWeeks.innerText = weeks;
-            valDays.innerText = days;
+            valDays.innerText = daysLeftForTicker;
             valHours.innerText = hours;
             valMins.innerText = minutes;
             valSecs.innerText = seconds;
+
+            // C. Text Format (Years, Months, Days) - NEW
+            let nextBdayDiff = calculateDiff(today, nextBirthday);
+            nextBdayText.innerText = `${nextBdayDiff.y} Years ${nextBdayDiff.m} Months ${nextBdayDiff.d} Days`;
         }
     </script>
 </body>
