@@ -3,149 +3,202 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Age Calculator & 18+ Checker</title>
+    <title>Age Calculator System</title>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f0f2f5;
+            background-color: #eef2f5;
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
             margin: 0;
         }
-        .container {
-            background-color: white;
+        .card {
+            background: white;
             padding: 30px;
-            border-radius: 15px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            width: 380px;
+            border-radius: 12px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
             text-align: center;
-            width: 350px;
         }
         h2 {
-            color: #333;
-            margin-bottom: 20px;
+            margin-top: 0;
+            color: #2c3e50;
         }
-        input[type="date"] {
+        label {
+            display: block;
+            text-align: left;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #555;
+        }
+        /* New Input Styling for Text Typing */
+        input[type="text"] {
             width: 100%;
-            padding: 12px;
-            margin-bottom: 20px;
-            border: 2px solid #ddd;
+            padding: 14px;
+            font-size: 18px;
+            border: 2px solid #ccc;
             border-radius: 8px;
-            font-size: 16px;
-            box-sizing: border-box; /* Ensures padding doesn't affect width */
+            box-sizing: border-box;
+            letter-spacing: 2px; /* Spacing between numbers */
+            text-align: center;
+            margin-bottom: 20px;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+        input[type="text"]:focus {
+            border-color: #007bff;
         }
         button {
+            width: 100%;
+            padding: 12px;
             background-color: #007bff;
             color: white;
-            padding: 12px 24px;
             border: none;
             border-radius: 8px;
             font-size: 16px;
             cursor: pointer;
-            width: 100%;
-            transition: background 0.3s;
+            font-weight: bold;
         }
         button:hover {
             background-color: #0056b3;
         }
-        .result {
+        .result-box {
             margin-top: 20px;
-            text-align: left;
-            background: #f9f9f9;
             padding: 15px;
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
             border-radius: 8px;
-            display: none; /* Hidden by default */
-            border-left: 5px solid #007bff;
+            text-align: left;
+            display: none; /* Hidden initially */
         }
-        .result p {
-            margin: 8px 0;
-            color: #555;
+        .result-item {
+            margin-bottom: 10px;
             font-size: 15px;
+            color: #333;
         }
-        .highlight {
+        .highlight-red {
+            color: #dc3545;
             font-weight: bold;
-            color: #d9534f;
         }
-        .green-text {
+        .highlight-green {
             color: #28a745;
             font-weight: bold;
+        }
+        .age-main {
+            font-size: 18px;
+            font-weight: bold;
+            color: #007bff;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 10px;
         }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <h2>Age Calculator</h2>
-    <label for="dob" style="display:block; text-align:left; margin-bottom:5px; font-weight:bold;">Apna Date of Birth dalein:</label>
-    <input type="date" id="dob">
-    <button onclick="calculateAge()">Check Age</button>
+<div class="card">
+    <h2>Age Check System</h2>
+    
+    <label>Enter Date of Birth (DD/MM/YYYY):</label>
+    <input type="text" id="dobInput" placeholder="DD/MM/YYYY" maxlength="10">
 
-    <div class="result" id="resultBox">
-        <p id="exactAge"></p>
-        <hr>
-        <p id="status18"></p>
-    </div>
+    <button onclick="calculateAge()">Check Details</button>
+
+    <div class="result-box" id="output">
+        </div>
 </div>
 
 <script>
-    function calculateAge() {
-        // 1. Input Value Lena
-        var dobInput = document.getElementById("dob").value;
-        var resultBox = document.getElementById("resultBox");
+    // 1. AUTO SLASH SCRIPT (Slash apne aap lagne ke liye)
+    const dobInput = document.getElementById('dobInput');
+
+    dobInput.addEventListener('input', function(e) {
+        let value = e.target.value.replace(/\D/g, ''); // Sirf numbers allow karega
         
-        if (!dobInput) {
-            alert("Kripya pehle Date of Birth select karein!");
+        if (value.length > 2) {
+            value = value.slice(0, 2) + '/' + value.slice(2);
+        }
+        if (value.length > 5) {
+            value = value.slice(0, 5) + '/' + value.slice(5);
+        }
+        e.target.value = value.slice(0, 10); // Limit length
+    });
+
+    // 2. CALCULATION SCRIPT
+    function calculateAge() {
+        const inputVal = dobInput.value;
+        const outputDiv = document.getElementById('output');
+
+        // Validation: Check if format is correct (10 characters)
+        if (inputVal.length !== 10) {
+            alert("Please enter full date in DD/MM/YYYY format.");
             return;
         }
 
-        // 2. Dates banana
-        var dob = new Date(dobInput);
-        var now = new Date();
+        // Parsing Date (DD/MM/YYYY ko alag karna)
+        const parts = inputVal.split('/');
+        const day = parseInt(parts[0], 10);
+        const month = parseInt(parts[1], 10);
+        const year = parseInt(parts[2], 10);
 
-        // 3. Age Calculation (Years, Months, Days)
-        var years = now.getFullYear() - dob.getFullYear();
-        var months = now.getMonth() - dob.getMonth();
-        var days = now.getDate() - dob.getDate();
+        // Date check
+        const dobDate = new Date(year, month - 1, day);
+        const today = new Date();
 
-        // Adjustments agar mahina/din negative ho
-        if (days < 0) {
-            months--;
-            // Pichle mahine ke din add karna
-            var prevMonth = new Date(now.getFullYear(), now.getMonth(), 0);
-            days += prevMonth.getDate();
-        }
-        if (months < 0) {
-            years--;
-            months += 12;
+        // Check valid date (e.g. 32/13/2000 invalid hai)
+        if (dobDate.getFullYear() !== year || dobDate.getMonth() + 1 !== month || dobDate.getDate() !== day) {
+            alert("Invalid Date! Please check the day and month.");
+            return;
         }
 
-        // 4. Output: Exact Age
-        document.getElementById("exactAge").innerHTML = 
-            `<strong>Aapki Exact Age hai:</strong><br>` +
-            `${years} Saal, ${months} Mahine, ${days} Din.`;
+        // --- Age Calculation Logic ---
+        let ageYears = today.getFullYear() - dobDate.getFullYear();
+        let ageMonths = today.getMonth() - dobDate.getMonth();
+        let ageDays = today.getDate() - dobDate.getDate();
 
-        // 5. 18 Saal ka Calculation
-        var statusMsg = "";
+        if (ageDays < 0) {
+            ageMonths--;
+            // Get days in previous month
+            let prevMonth = new Date(today.getFullYear(), today.getMonth(), 0);
+            ageDays += prevMonth.getDate();
+        }
+        if (ageMonths < 0) {
+            ageYears--;
+            ageMonths += 12;
+        }
+
+        // --- 18+ Check Logic ---
+        let message18 = "";
         
-        if (years >= 18) {
-            statusMsg = "<span class='green-text'>✅ Aap 18 saal se upar hain. (Eligible)</span>";
+        if (ageYears >= 18) {
+            message18 = `<span class="highlight-green">✅ You are already 18+ years old.</span>`;
         } else {
-            // Target date: 18th Birthday
-            var dobYear = dob.getFullYear();
-            var targetYear = dobYear + 18;
-            var targetDate = new Date(targetYear, dob.getMonth(), dob.getDate());
+            // Calculate next 18th birthday
+            const targetYear = year + 18;
+            const targetDate = new Date(targetYear, month - 1, day);
             
-            // Difference in time
-            var diffTime = targetDate - now;
-            var diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
+            // Difference in milliseconds
+            const diffTime = targetDate - today;
+            // Convert to days
+            const daysLeft = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
-            statusMsg = `<span class='highlight'>⚠️ Aap abhi 18 saal ke nahi hain.</span><br>` +
-                        `18 saal pura hone mein abhi <strong>${diffDays} din</strong> baki hain.`;
+            message18 = `<span class="highlight-red">⚠️ You are under 18.</span><br>
+                         Days remaining for 18th Birthday: <strong>${daysLeft} days</strong>`;
         }
 
-        document.getElementById("status18").innerHTML = statusMsg;
-        resultBox.style.display = "block";
+        // --- Final Output HTML ---
+        outputDiv.style.display = 'block';
+        outputDiv.innerHTML = `
+            <div class="age-main">
+                Exact Age:<br>
+                ${ageYears} Years, ${ageMonths} Months, ${ageDays} Days
+            </div>
+            <div class="result-item">
+                ${message18}
+            </div>
+        `;
     }
 </script>
 
