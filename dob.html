@@ -69,13 +69,6 @@
             box-shadow: 0 0 10px rgba(118, 75, 162, 0.2);
         }
 
-        input[type="tel"]::placeholder {
-            color: #aaa;
-            letter-spacing: 1px;
-            font-size: 1rem;
-            font-weight: 400;
-        }
-
         .result-box {
             display: none;
             margin-top: 20px;
@@ -167,83 +160,74 @@
         const countdownBox = document.getElementById('countdownBox');
         const timeLeftText = document.getElementById('timeLeft');
 
-        // Main Logic
         dobInput.addEventListener('input', function(e) {
             // Handle backspace normally
             if (e.inputType === "deleteContentBackward") return;
 
-            let val = this.value;
-            let lastChar = val.slice(-1);
-            
-            // Allow only numbers and slash (slash is added by code, user types numbers)
-            // Note: input type="tel" already restricts keyboard, but this is double safety
-            if (!/^\d| \/$/.test(lastChar)) {
-                this.value = val.slice(0, -1);
-                return;
-            }
-
-            // --- RECONSTRUCT LOGIC (Smart Slash) ---
-            let rawNumbers = val.replace(/\D/g, '');
+            // 1. Get only numbers
+            let val = this.value.replace(/\D/g, '');
             let formatted = '';
-            
-            if (rawNumbers.length > 0) {
-                // Day
-                formatted += rawNumbers.substring(0, 2);
-                if (rawNumbers.length >= 2) formatted += '/';
 
-                // Month
-                if (rawNumbers.length > 2) {
-                    let monthPart = rawNumbers.substring(2);
-                    let m1 = parseInt(monthPart[0]);
+            // 2. Build Day (DD)
+            if (val.length > 0) {
+                formatted = val.substring(0, 2);
+                if (val.length >= 2) formatted += '/';
+            }
 
-                    // Smart Month: If user types 2-9, assume single digit month
-                    if (monthPart.length === 1 && m1 > 1) {
-                         formatted += monthPart + '/';
-                    } else {
-                        formatted += monthPart.substring(0, 2);
-                        if (monthPart.length >= 2) formatted += '/';
-                    }
+            // 3. Build Month (MM) - Smart Logic
+            if (val.length > 2) {
+                let monthPart = val.substring(2);
+                let firstDigit = parseInt(monthPart[0]);
+
+                // If first digit is 2-9, it's a single digit month (e.g. Feb-Sept)
+                if (monthPart.length >= 1 && firstDigit > 1) {
+                    formatted += monthPart[0] + '/';
+                    // Re-adjust 'val' logic for year parsing below if needed, 
+                    // but simplest is to take remainder as year
+                } else {
+                    // Standard 01-12 logic
+                    formatted += monthPart.substring(0, 2);
+                    if (monthPart.length >= 2) formatted += '/';
                 }
+            }
 
-                // Year
-                // We need to find where the year part starts in the raw string
-                // It depends if month was 1 digit or 2 digits.
-                // Let's rely on splitting the formatted string so far.
-                let parts = formatted.split('/');
+            // 4. Build Year (YYYY) - Strict 19xx / 20xx Logic
+            let partsSoFar = formatted.split('/');
+            
+            // We only process year if we have passed the second slash
+            if (partsSoFar.length === 3) {
+                let yearPartRaw = partsSoFar[2]; // Whatever is currently in the year slot
                 
-                if (parts.length === 3) {
-                    let yearPart = parts[2];
+                // Logic to extract year part from original 'val' is tricky because of the smart slash.
+                // Instead, let's rely on what the user JUST typed.
+                
+                // Let's filter the Year Part strictly:
+                if (yearPartRaw.length > 0) {
+                    let y1 = yearPartRaw[0];
                     
-                    // --- YEAR RESTRICTION LOGIC ---
-                    // 1. First digit must be 1 or 2
-                    if (yearPart.length === 1) {
-                        if (yearPart !== '1' && yearPart !== '2') {
-                            // If user typed 3, 4, etc., reject it.
-                            // Remove the last char from formatted
-                            formatted = formatted.slice(0, -1); 
-                        }
-                    }
-                    // 2. Second digit logic
-                    else if (yearPart.length === 2) {
-                        if (yearPart[0] === '1' && yearPart[1] !== '9') {
-                            // If starts with 1, second MUST be 9 (for 19xx)
-                            formatted = formatted.slice(0, -1);
-                        }
-                        else if (yearPart[0] === '2' && yearPart[1] !== '0') {
-                            // If starts with 2, second MUST be 0 (for 20xx)
-                            formatted = formatted.slice(0, -1);
-                        }
-                    }
-                    // 3. Length Limit (handled by maxlength=10, but good to ensure)
-                    else if (yearPart.length > 4) {
+                    // Rule 1: First digit MUST be 1 or 2
+                    if (y1 !== '1' && y1 !== '2') {
+                        // If invalid, remove it from formatted
                         formatted = formatted.slice(0, -1);
+                    } else {
+                        // First digit is valid. Check second digit if it exists.
+                        if (yearPartRaw.length > 1) {
+                            let y2 = yearPartRaw[1];
+                            // Rule 2: If starts with 1, next must be 9. If starts with 2, next must be 0.
+                            if (y1 === '1' && y2 !== '9') {
+                                formatted = formatted.slice(0, -1);
+                            } else if (y1 === '2' && y2 !== '0') {
+                                formatted = formatted.slice(0, -1);
+                            }
+                        }
                     }
                 }
             }
 
+            // Update Input
             this.value = formatted;
 
-            // --- AUTO HIDE KEYBOARD ---
+            // 5. Final Check & Auto Hide
             if (this.value.length === 10) {
                 this.blur(); // Hides keyboard
                 calculateAge(this.value);
@@ -258,18 +242,16 @@
             const month = parseInt(parts[1], 10);
             const year = parseInt(parts[2], 10);
 
+            // Validation
             if (isNaN(day) || isNaN(month) || isNaN(year)) return;
-            // Additional check: Year range strict enforcement
-            if (year < 1900 || year > new Date().getFullYear()) {
-                 alert("Invalid Year"); return;
-            }
+            if (year < 1901 || year > 2099) return; // Strict range check for calculation
 
             const dob = new Date(year, month - 1, day);
             const today = new Date();
 
             if (dob > today) return;
 
-            // Age Calculation
+            // Age Calc
             let ageYears = today.getFullYear() - dob.getFullYear();
             let ageMonths = today.getMonth() - dob.getMonth();
             let ageDays = today.getDate() - dob.getDate();
@@ -286,7 +268,7 @@
 
             currentAgeText.innerText = `${ageYears} Years ${ageMonths} Months ${ageDays} Days`;
 
-            // Countdown Logic
+            // Countdown Calc
             if (ageYears >= 18) {
                 countdownBox.className = "countdown-display success-msg";
                 countdownBox.querySelector('h3').innerText = "Status";
